@@ -17,7 +17,7 @@ suitable projected CRS (area for polygons, length for lines) over REST.
 Requires Python 3.12+. [uv](https://docs.astral.sh/uv/) is recommended.
 
 ```bash
-git clone <repo-url> && cd geospatial-measurement-api
+git clone https://github.com/Eswar809/geospatial-measurement-api && cd geospatial-measurement-api
 uv venv && uv pip install -e ".[dev]"
 cp .env.example .env   # optional, defaults work out of the box
 uv run uvicorn app.main:app --reload
