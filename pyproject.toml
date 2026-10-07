@@ -33,3 +33,13 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["app"]
+
+[tool.ruff]
+target-version = "py312"
+
+[tool.ruff.lint]
+# B008 (function call in default arg) is FastAPI's idiomatic Depends() pattern.
+ignore = ["B008"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

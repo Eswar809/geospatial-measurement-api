@@ -45,3 +45,11 @@ This file tracks unexpected findings and fixes during development. It feeds the 
 - **Per-feature exceptions become ERROR:** `_safe_measure` catches everything (noqa BLE001, intentional by design) so one bad geometry never fails the file.
 - **Temp dirs always cleaned:** `TemporaryDirectory` context manager wraps `safe_extract`+read, so hostile zips leave no leaked dirs.
 - **Error messages carry no paths:** Tests assert "tmp"/"uploads" absent from `error_message`; `file_id` travels in `error.details` instead.
+
+## Phase 4 — API
+
+- **GDAL layer order decides feature index:** It lists the parent "Parcels" folder before the nested "North block" layer, so `features[0]` is the access-road LineString, not the polygon. Tests assert on a `next(f for f in features if ...)` lookup instead of assuming index 0.
+- **Ruff B008 vs FastAPI Depends():** Ruff 0.16 fires B008 on the idiomatic `db: Session = Depends(get_db)` pattern. Fixed with a project-level `[tool.ruff.lint] ignore = ["B008"]` in pyproject.toml (project convention, not per-line noqa). Also added `[tool.pytest.ini_options] testpaths`.
+- **Redirect slashes need care in tests:** POST to `/api/files` (no slash) returns 201 via redirect-follow because TestClient follows redirects by default; strict slash tests would 307 without `follow_redirects=False`.
+- **Summary uses SQL, not the page:** `by_geometry_type`/`by_measurement_status` counts and `total_area_m2`/`total_length_m` come from `GROUP BY` + `SUM` queries over the whole file, so they stay correct under pagination.
+- **Rounded at serialization only:** DB stores full precision; `round(x, 4)` applied in `_build_summary` and in `measure_geometry` return values.
