@@ -27,7 +27,8 @@ uv run uvicorn app.main:app --reload
 - Health: `curl http://localhost:8000/health` → `{"status":"ok"}`
 - Tests: `uv run pytest` (slow smoke: `uv run pytest -m slow`)
 - Lint: `uv run ruff check . && uv run ruff format --check .`
-- Docker: `docker build -t geo-api . && docker run -p 8000:8000 -v geo-data:/app/data geo-api`
+- Docker: `docker run -p 8000:8000 -v geo-data:/app/data ghcr.io/eswar809/geospatial-measurement-api:latest`
+  (or build locally: `docker build -t geo-api . && docker run -p 8000:8000 -v geo-data:/app/data geo-api`)
 
 Config lives in `.env` (see `.env.example`): `DATABASE_URL`,
 `UPLOAD_DIR`, `MAX_UPLOAD_MB` (50), `MAX_UNCOMPRESSED_MB` (250),
