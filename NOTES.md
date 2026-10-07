@@ -23,3 +23,14 @@ This file tracks unexpected findings and fixes during development. It feeds the 
 - **Lat boundary tests fixed:** 83.9°N is zone 31 (EPSG:32631), not 32660. -80° is zone 31 south (32731), UPS South starts below -80.
 - **Build backend:** uv_build expected `src/` layout. Switched to hatchling with `packages = ["app"]`.
 - **Ruff BLE001:** Narrowed `except Exception` to `pyproj.exceptions.ProjError` and `(ProjError, ValueError)` in measure.py.
+
+## Phase 2 — Readers & Archive
+
+- **GDAL keeps geometry-less Placemarks:** `pyogrio.read_dataframe` returns the row with `geometry=None` instead of skipping it. Good — feature count matches the Placemark count, and `measure_geometry(None)` already returns UNSUPPORTED.
+- **KML CRS is always EPSG:4326:** Driver reports it automatically; set explicitly per the KML spec. Altitude preserved on read (has_z=True), measurement forces 2D.
+- **MultiGeometry → GeometryCollection:** GDAL maps KML `<MultiGeometry>` to a GeometryCollection with named parts — our UNSUPPORTED-with-reason path handles it.
+- **Zip Slip on Windows:** `Path("../../evil.sh").parts` works on Windows but `Path("/tmp/evil.shp").is_absolute()` misses POSIX paths when running on Windows. Fix: check both PurePosixPath and PureWindowsPath, plus leading `/` or `\`.
+- **Skip-vs-unsafe ordering matters:** `..` in `_is_skipped` dotfile check swallowed `../../evil.sh` before the unsafe check saw it. Fix: run `_is_unsafe` FIRST, then skip dotfiles (excluding `.` and `..` from the dotfile rule).
+- **pyogrio CRS is None (not an exception):** Missing or garbage `.prj` reads fine with `crs=None`. The assume-4326 policy checks every coordinate is valid lon/lat via `shapely.get_coordinates`.
+- **pyogrio error types:** Malformed KML raises `pyogrio.errors.DataSourceError`; catch `DataSourceError` + `DataLayerError` and wrap in our `InvalidGeoDataError`.
+- **ArchiveError now subclasses InvalidArchiveError:** Readers raise `InvalidArchiveError` directly for missing parts, so archive safety errors flow through the same 422 envelope.
