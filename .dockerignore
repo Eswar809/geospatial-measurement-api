@@ -1,0 +1,15 @@
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.git/
+data/
+.env
+.coverage
+htmlcov/
+*.db
+tests/
+samples/
+scripts/
+NOTES.md

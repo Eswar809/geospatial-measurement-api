@@ -53,3 +53,7 @@ This file tracks unexpected findings and fixes during development. It feeds the 
 - **Redirect slashes need care in tests:** POST to `/api/files` (no slash) returns 201 via redirect-follow because TestClient follows redirects by default; strict slash tests would 307 without `follow_redirects=False`.
 - **Summary uses SQL, not the page:** `by_geometry_type`/`by_measurement_status` counts and `total_area_m2`/`total_length_m` come from `GROUP BY` + `SUM` queries over the whole file, so they stay correct under pagination.
 - **Rounded at serialization only:** DB stores full precision; `round(x, 4)` applied in `_build_summary` and in `measure_geometry` return values.
+
+## Phase 5 — Hardening & Tooling
+
+- **Docker not installed locally:** `docker` command missing on this Windows box, so `docker build`/`run` unverified here — CI workflow syntax check + Dockerfile kept minimal (python:3.12-slim, non-root appuser, data volume). Verify build in CI or a Docker host before release.
