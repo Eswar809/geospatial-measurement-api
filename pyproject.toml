@@ -1,0 +1,32 @@
+[project]
+name = "geospatial-measurement-api"
+version = "0.1.0"
+description = "FastAPI service for measuring geospatial features from Shapefiles and KML"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "python-multipart>=0.0.9",
+    "pydantic-settings>=2.5",
+    "sqlalchemy>=2.0",
+    "geopandas>=0.14",
+    "pyogrio>=0.10",
+    "shapely>=2.0",
+    "pyproj>=3.6",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "httpx>=0.27",
+    "ruff>=0.6",
+]
+
+[project.scripts]
+geospatial-measurement-api = "geospatial_measurement_api:main"
+
+[build-system]
+requires = ["uv_build>=0.12.23,<0.13.0"]
+build-backend = "uv_build"
