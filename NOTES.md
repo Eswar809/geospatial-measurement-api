@@ -34,3 +34,14 @@ This file tracks unexpected findings and fixes during development. It feeds the 
 - **pyogrio CRS is None (not an exception):** Missing or garbage `.prj` reads fine with `crs=None`. The assume-4326 policy checks every coordinate is valid lon/lat via `shapely.get_coordinates`.
 - **pyogrio error types:** Malformed KML raises `pyogrio.errors.DataSourceError`; catch `DataSourceError` + `DataLayerError` and wrap in our `InvalidGeoDataError`.
 - **ArchiveError now subclasses InvalidArchiveError:** Readers raise `InvalidArchiveError` directly for missing parts, so archive safety errors flow through the same 422 envelope.
+
+## Phase 3 — Persistence & Ingestion
+
+- **Routes are plain `def`, so storage stays sync:** The plan says endpoints are plain def so GDAL work runs in the threadpool. That means `storage.save_upload` takes a binary file-like (`UploadFile.file`, `BytesIO` in tests) — no async iterator plumbing needed.
+- **Magic-byte sniffing, not Content-Type:** Zip magic (`PK\x03\x04` etc.) and `<` after BOM/whitespace strip for KML. A `.zip` with text content hits 422 with a FAILED record, not 415.
+- **Validation errors before any record:** 415/400/413 raise before the PROCESSING insert, so "nothing persisted" tests assert zero FileRecords.
+- **`_mark_failed` re-fetches the record:** After `rollback()`, the in-memory object is detached — `db.get(FileRecord, id)` before setting FAILED status.
+- **`bulk_insert_mappings` in batches of 1000:** Per the plan; mappings built from measured features with file-wide 0-based index.
+- **Per-feature exceptions become ERROR:** `_safe_measure` catches everything (noqa BLE001, intentional by design) so one bad geometry never fails the file.
+- **Temp dirs always cleaned:** `TemporaryDirectory` context manager wraps `safe_extract`+read, so hostile zips leave no leaked dirs.
+- **Error messages carry no paths:** Tests assert "tmp"/"uploads" absent from `error_message`; `file_id` travels in `error.details` instead.
